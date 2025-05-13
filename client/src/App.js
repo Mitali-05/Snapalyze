@@ -21,7 +21,7 @@ function App() {
     try {
       setLoading(true);
       setMessage('');
-      const res = await axios.post('http://localhost:5000/api/images/upload', formData, {
+      const res = await axios.post('http://localhost:5000/api/zip/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
