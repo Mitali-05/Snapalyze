@@ -1,0 +1,12 @@
+.dashboard-container {
+  height: 100vh;
+  background-color: #1976d2;
+}
+
+.dashboard-header {
+  background-color: white;
+  padding: 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+}
