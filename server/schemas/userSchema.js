@@ -2,6 +2,19 @@ import mongoose from 'mongoose';
 
 // Define user schema
 const userSchema = new mongoose.Schema({
+  // First Name (Now split into firstName and lastName)
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  // Last Name
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  // Email
   email: {
     type: String,
     required: true,
@@ -9,32 +22,38 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  // Password
   password: {
     type: String,
     required: true,
   },
-  name: {
+  // Profession
+  profession: {
     type: String,
-    required: true,
-    trim: true
+    enum: ['unemployed', 'student', 'employee', 'freelancer', 'entrepreneur', 'other'],
+    required: true
   },
+  // Organization (Optional)
+  organization: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  // Role (Set to 'user' by default, can be changed to 'admin' or 'moderator')
   role: {
     type: String,
-    enum: ['user', 'admin', 'moderator'], // example roles
+    enum: ['user', 'admin'],
     default: 'user'
   },
-  profileImage: {
-    type: String,  // URL or path to the image
-    default: 'default.jpg'
-  },
+  // Active Status
   isActive: {
     type: Boolean,
     default: true
   },
+  // Last Login
   lastLogin: {
     type: Date,
   },
 }, { timestamps: true });
-
 
 export default userSchema;

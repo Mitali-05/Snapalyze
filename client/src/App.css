@@ -1,53 +1,38 @@
 .App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
-  font-family: Arial, sans-serif;
-}
-
-.upload-box {
-  border: 2px dashed #ccc;
-  padding: 40px;
-  width: 400px;
-  text-align: center;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-  cursor: pointer;
-  transition: border 0.2s ease;
-}
-
-.upload-box:hover {
-  border-color: #888;
-}
-
-.upload-icon {
-  font-size: 48px;
-  margin-bottom: 10px;
-}
-
-.upload-button {
-  background-color: #111;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
   color: white;
-  padding: 10px 20px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.upload-button:hover {
-  background-color: #333;
+.App-link {
+  color: #61dafb;
 }
 
-.file-types {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.status-msg {
-  margin-top: 20px;
-  font-weight: bold;
-  color: green;
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
