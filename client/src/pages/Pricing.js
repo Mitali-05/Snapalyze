@@ -26,22 +26,40 @@ function Pricing() {
     fetchUserPlan();
   }, [userId]);
 
+  // const handlePlanSelection = async (selectedPlan) => {
+  //   try {
+  //     if (!userId) {
+  //       console.error('No userId found in localStorage');
+  //       return;
+  //     }
+
+  //     const response = await axios.post('/api/user/plan', { userId, plan: selectedPlan });
+  //     console.log('Plan updated:', response.data);
+
+  //     setPlanSelected(true);
+  //     navigate('/upload');
+  //   } catch (err) {
+  //     console.error('Error selecting plan:', err);
+  //   }
+  // };
   const handlePlanSelection = async (selectedPlan) => {
-    try {
-      if (!userId) {
-        console.error('No userId found in localStorage');
-        return;
-      }
-
-      const response = await axios.post('/api/user/plan', { userId, plan: selectedPlan });
-      console.log('Plan updated:', response.data);
-
-      setPlanSelected(true);
-      navigate('/upload');
-    } catch (err) {
-      console.error('Error selecting plan:', err);
+  try {
+    if (!userId) {
+      console.error('No userId found in localStorage');
+      return;
     }
-  };
+
+    const response = await axios.post('/api/user/plan', { userId, plan: selectedPlan });
+    console.log('Plan updated:', response.data);
+
+    setPlanSelected(true);
+    // Redirect to checkout page with selected plan info
+    navigate('/checkout', { state: { plan: selectedPlan } });
+  } catch (err) {
+    console.error('Error selecting plan:', err);
+  }
+};
+
 
   const handleOptionSelection = (option) => {
     if (option === 'analyze') navigate('/analyze-text');

@@ -8,9 +8,11 @@ import Upload from './pages/Upload';
 import GetStarted from './pages/GetStarted';
 import AnalyzeText from './pages/AnalyzeText';
 import TextExtraction from './pages/TextExtraction';
+import  Dashboard from './pages/Dashboard';
 import ClassifyImages from './pages/ClassifyImages';
-
+import Checkout from './pages/Checkout';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+
 
 const theme = createTheme({
   palette: {
@@ -32,6 +34,8 @@ function App() {
         <Route path="/analyze-text" element={<AnalyzeText />} />
         <Route path="/text-extraction" element={<TextExtraction />} />
         <Route path="/classify-images" element={<ClassifyImages />} />
+        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/checkout" element={<Checkout/>}/>
       </Routes>
     </ThemeProvider>
   );

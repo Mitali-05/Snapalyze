@@ -48,8 +48,8 @@ function Header() {
           }}
         >
           <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link>
-          <Link to="/products" style={{ textDecoration: 'none', color: 'inherit' }}>Our Products</Link>
-          <Link to="/pricing" style={{ textDecoration: 'none', color: 'inherit' }}>Pricing</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>Our Products</Link>
+          <Link to="/Pricing_to" style={{ textDecoration: 'none', color: 'inherit' }}>Pricing</Link>
         </Box>
 
         {/* Login & Get Started Buttons */}

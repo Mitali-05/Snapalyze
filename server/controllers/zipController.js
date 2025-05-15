@@ -1,7 +1,7 @@
-// controllers/zipController.js
 import JSZip from 'jszip';
 import { GridFSBucket } from 'mongodb';
-import connectDB from '../config/db.js';  // Correct import
+import connectDB from '../config/db.js';
+import Zip from '../models/zipmodels.js';
 
 /**
  * Handles a zip file upload, extracts image files, and stores them in MongoDB GridFS.
@@ -14,45 +14,50 @@ export const handleZipUpload = async (req, res) => {
 
     const zip = await JSZip.loadAsync(req.file.buffer);
     const images = [];
+    let totalSize = 0;
 
-    // Connect to MongoDB and get the db object
     const db = await connectDB();
-
-    // Create GridFS Bucket for storing files in MongoDB
     const bucket = new GridFSBucket(db, { bucketName: 'images' });
 
-    // Iterate through the files inside the zip
     await Promise.all(
       Object.keys(zip.files).map(async (filename) => {
         const file = zip.files[filename];
 
         if (!file.dir && /\.(jpe?g|png|gif|bmp|webp)$/i.test(filename)) {
           const fileData = await file.async('nodebuffer');
+          const ext = filename.split('.').pop().toLowerCase();
 
-          // Create a readable stream for the image buffer
+          totalSize += fileData.length;
+
           const stream = bucket.openUploadStream(filename, {
-            contentType: 'image/jpeg', // Or use other appropriate content type
+            contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
           });
 
-          // Write the image data to GridFS
           stream.end(fileData);
 
-          // Store image info for response
           images.push({
             filename,
-            id: stream.id,
+            fileSize: fileData.length,
+            fileType: ext,
           });
 
-          // Log the success of image upload to GridFS
-          console.log(`Successfully uploaded ${filename} with ID: ${stream.id}`);
+          console.log(`Uploaded ${filename}`);
         }
       })
     );
 
-    // Example response (or process the images as needed)
+    // Save metadata in Zip collection
+    const savedZip = await Zip.create({
+      originalFileName: req.file.originalname,
+      fileSize: totalSize,
+      uploadedAt: new Date(),
+      images,
+    });
+
     res.status(200).json({
-      message: `${images.length} image(s) extracted and stored in GridFS.`,
-      files: images.map((img) => img.filename),
+      message: `${images.length} image(s) stored in GridFS.`,
+      zipId: savedZip._id,
+      images,
     });
   } catch (error) {
     console.error('Error processing zip file:', error);
