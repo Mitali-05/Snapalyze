@@ -48,7 +48,7 @@ function Header() {
           }}
         >
           <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link>
-          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>Our Products</Link>
+          <Link to="/products" style={{ textDecoration: 'none', color: 'inherit' }}>Our Products</Link>
           <Link to="/Pricing_to" style={{ textDecoration: 'none', color: 'inherit' }}>Pricing</Link>
         </Box>
 
