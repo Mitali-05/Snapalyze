@@ -4,11 +4,13 @@ import { Email, Lock } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios
 import Swal from 'sweetalert2'; // Import SweetAlert
+import { useAuth } from '../context/AuthContext'; // Import useAuth from your context
 
 function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from context
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,9 +22,10 @@ function Login() {
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/login`, formData);
- console.log('Login response:', response.data);
+      console.log('Login response:', response.data);
       if (response.status === 200 && response.data.token) {
-    
+        login(response.data.token); // Save token in context/localStorage
+
         // Display success message with SweetAlert
         Swal.fire({
           icon: 'success',

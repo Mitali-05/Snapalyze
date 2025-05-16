@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { handleZipUpload } from '../controllers/zipController.js';
+import { handleZipUpload,extractTextFromZipImages,classifyZipImages } from '../controllers/zipController.js';
 
 const router = express.Router();
 
@@ -10,5 +10,7 @@ const upload = multer({ storage });
 
 // Route for uploading ZIP files (file field name should be 'file')
 router.post('/upload', upload.single('file'), handleZipUpload);
+router.get('/extract-text/:zipId', extractTextFromZipImages);
+router.get('/classify/:zipId', classifyZipImages);
 
 export default router;

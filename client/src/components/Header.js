@@ -2,11 +2,21 @@ import React from 'react';
 import { AppBar, Toolbar, Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import logo from '../logo.jpg';
 
 function Header() {
+  // Scroll to element by id with smooth behavior
+  const handleScroll = (id) => (event) => {
+    event.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <AppBar
-      position="static"
+      position="sticky"
       elevation={0}
       sx={{
         backgroundColor: '#fff',
@@ -18,24 +28,41 @@ function Header() {
       <Toolbar
         sx={{
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          maxWidth: '1200px',
-          marginX: 'auto',
+          alignItems: 'center',
           width: '100%',
+          px: { xs: 4, sm: 6, md: 8, lg: 10 }, // responsive horizontal padding
         }}
       >
         {/* Logo */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '200px' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img
-              src="/img/logo.svg"
-              alt="Snapalyze Logo"
-              style={{ height: 40, marginRight: 8 }}
+              src={logo}
+              alt="Snapalyze logo"
+              style={{
+                height: 60,
+                width: 'auto',
+                marginRight: 12,
+                objectFit: 'contain',
+              }}
             />
+            <span
+              style={{
+                fontWeight: 'bold',
+                fontSize: 28,
+                background: 'linear-gradient(90deg, #f14156, #2b2b4f)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                display: 'inline-block',
+                letterSpacing: 1,
+              }}
+            >
+              Snapalyze
+            </span>
           </Link>
         </Box>
 
-        {/* Center Navigation */}
+        {/* Center Navigation - scroll to IDs */}
         <Box
           sx={{
             display: 'flex',
@@ -47,9 +74,27 @@ function Header() {
             color: '#2b2b4f',
           }}
         >
-          <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link>
-          <Link to="/products" style={{ textDecoration: 'none', color: 'inherit' }}>Our Products</Link>
-          <Link to="/pricing" style={{ textDecoration: 'none', color: 'inherit' }}>Pricing</Link>
+          <a
+            href="#about"
+            onClick={handleScroll('about')}
+            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+          >
+            About Us
+          </a>
+          <a
+            href="#features"
+            onClick={handleScroll('features')}
+            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            onClick={handleScroll('pricing')}
+            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+          >
+            Pricing
+          </a>
         </Box>
 
         {/* Login & Get Started Buttons */}
@@ -73,7 +118,7 @@ function Header() {
           </Button>
           <Button
             component={Link}
-            to="/get-started"
+            to="/register"
             endIcon={<ArrowForwardIcon />}
             sx={{
               textTransform: 'none',
