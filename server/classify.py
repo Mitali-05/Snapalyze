@@ -8,8 +8,18 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
+# Existing FastAPI app
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # MongoDB connection string (set your real URI in environment variables)
 MONGO_URI = os.getenv("MONGO_URI", "your-mongodb-uri")

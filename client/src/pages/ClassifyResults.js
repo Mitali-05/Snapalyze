@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Card, CardContent, Typography, CircularProgress, Box } from '@mui/material';
-
-const classLabels = ["Education", "Medical", "Jobs", "Bills", "Other"]; // Update based on your model
+import {
+  CircularProgress,
+  Box,
+  Typography,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  TableContainer,
+} from '@mui/material';
 
 const ClassifyResults = ({ zipId }) => {
   const [results, setResults] = useState([]);
@@ -38,19 +47,43 @@ const ClassifyResults = ({ zipId }) => {
       <Typography variant="h5" gutterBottom>
         Classification Results for ZIP ID: {zipId}
       </Typography>
-      {results.map((img, index) => (
-        <Card key={index} variant="outlined" sx={{ mb: 2, p: 2 }}>
-          <CardContent>
-            <Typography variant="h6">{img.filename}</Typography>
-            <Typography>
-              Prediction: <strong>{classLabels[img.prediction]}</strong>
-            </Typography>
-            <Typography>
-              Confidence: {(img.confidence * 100).toFixed(2)}%
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>Filename</strong></TableCell>
+              <TableCell><strong>Top Label</strong></TableCell>
+              <TableCell><strong>Confidence</strong></TableCell>
+              <TableCell><strong>Top 3 Predictions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {results.map((img, index) => (
+              <TableRow key={index}>
+                <TableCell>{img.filename}</TableCell>
+                <TableCell>{img.predictions?.[0]?.label || 'N/A'}</TableCell>
+                <TableCell>
+                  {img.predictions?.[0]
+                    ? `${(img.predictions[0].confidence * 100).toFixed(2)}%`
+                    : 'N/A'}
+                </TableCell>
+                <TableCell>
+                  {img.predictions?.length ? (
+                    img.predictions.map((pred, i) => (
+                      <div key={i}>
+                        {pred.label}: {(pred.confidence * 100).toFixed(2)}%
+                      </div>
+                    ))
+                  ) : (
+                    <div>N/A</div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };
