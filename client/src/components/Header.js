@@ -1,18 +1,61 @@
-import React from 'react';
-import { AppBar, Toolbar, Box, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Typography,
+  IconButton,
+} from '@mui/material';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import logo from '../logo.jpg';
+import { useAuth } from '../context/AuthContext';
 
-function Header() {
-  // Scroll to element by id with smooth behavior
+function Header({ setActiveView, quotaFull }) {  // <-- receive quotaFull prop
+  const { logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isLoggedIn = Boolean(localStorage.getItem('token'));
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleProfileClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleProfileClose();
+    navigate('/login', { replace: true });
+  };
+
   const handleScroll = (id) => (event) => {
     event.preventDefault();
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const handleUploadClick = (e) => {
+    if (quotaFull) {
+      e.preventDefault();
+      alert('Upload quota exceeded. Please upgrade your plan or wait until your quota resets.');
+      return;
+    }
+    // otherwise, proceed normally (Link will handle navigation)
+  };
+
+  const isHome = location.pathname === '/';
+  const isDashboard = location.pathname.startsWith('/dashboard');
+  const isUpload = location.pathname.startsWith('/upload');
 
   return (
     <AppBar
@@ -30,39 +73,36 @@ function Header() {
           justifyContent: 'space-between',
           alignItems: 'center',
           width: '100%',
-          px: { xs: 4, sm: 6, md: 8, lg: 10 }, // responsive horizontal padding
+          px: { xs: 4, sm: 6, md: 8, lg: 10 },
         }}
       >
         {/* Logo */}
         <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '200px' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <Link
+            to="/"
+            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          >
             <img
               src={logo}
               alt="Snapalyze logo"
-              style={{
-                height: 60,
-                width: 'auto',
-                marginRight: 12,
-                objectFit: 'contain',
-              }}
+              style={{ height: 60, width: 'auto', marginRight: 12, objectFit: 'contain' }}
             />
-            <span
-              style={{
+            <Typography
+              variant="h5"
+              sx={{
                 fontWeight: 'bold',
-                fontSize: 28,
                 background: 'linear-gradient(90deg, #f14156, #2b2b4f)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                display: 'inline-block',
                 letterSpacing: 1,
               }}
             >
               Snapalyze
-            </span>
+            </Typography>
           </Link>
         </Box>
 
-        {/* Center Navigation - scroll to IDs */}
+        {/* Center Navigation */}
         <Box
           sx={{
             display: 'flex',
@@ -74,67 +114,138 @@ function Header() {
             color: '#2b2b4f',
           }}
         >
-          <a
-            href="#about"
-            onClick={handleScroll('about')}
-            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
-            About Us
-          </a>
-          <a
-            href="#features"
-            onClick={handleScroll('features')}
-            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
-            Features
-          </a>
-          <a
-            href="#pricing"
-            onClick={handleScroll('pricing')}
-            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
-            Pricing
-          </a>
+          {isHome && (
+            <>
+              <Button onClick={handleScroll('about')} sx={{ color: 'inherit', textTransform: 'none' }}>
+                About Us
+              </Button>
+              <Button onClick={handleScroll('features')} sx={{ color: 'inherit', textTransform: 'none' }}>
+                Features
+              </Button>
+              <Button
+                onClick={(e) => {
+                  if (isHome) {
+                    handleScroll('pricing')(e);
+                  } else if (isDashboard && setActiveView) {
+                    setActiveView('pricing');
+                  }
+                }}
+                sx={{ color: 'inherit', textTransform: 'none' }}
+              >
+                Pricing
+              </Button>
+            </>
+          )}
+
+          {isDashboard && (
+            <>
+              <Button
+                onClick={() => {
+                  if (setActiveView) setActiveView('dashboard');
+                }}
+                sx={{ color: 'inherit', textTransform: 'none' }}
+              >
+                Dashboard
+              </Button>
+
+              {/* Upload button disabled or blocked if quotaFull */}
+              <Button
+                component={Link}
+                to={quotaFull ? '#' : '/upload'}
+                onClick={handleUploadClick}
+                sx={{
+                  color: quotaFull ? 'gray' : 'inherit',
+                  textTransform: 'none',
+                  pointerEvents: quotaFull ? 'none' : 'auto', // disable click if full
+                }}
+              >
+                Upload a Zip
+              </Button>
+
+              <Button
+                onClick={() => {
+                  if (setActiveView) setActiveView('pricing');
+                }}
+                sx={{ color: 'inherit', textTransform: 'none' }}
+              >
+                Pricing
+              </Button>
+            </>
+          )}
+
+          {isUpload && <></>}
         </Box>
 
-        {/* Login & Get Started Buttons */}
+        {/* Right Side Buttons */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button
-            component={Link}
-            to="/login"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              color: '#2b2b4f',
-              textTransform: 'none',
-              fontWeight: 'bold',
-              borderRadius: '999px',
-              backgroundColor: 'transparent',
-              '&:hover': {
-                backgroundColor: '#f5f5f5',
-              },
-            }}
-          >
-            Login
-          </Button>
-          <Button
-            component={Link}
-            to="/register"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 'bold',
-              color: '#f14156',
-              backgroundColor: '#ffffff',
-              borderRadius: '999px',
-              border: '2px solid #f14156',
-              paddingX: 3,
-              '&:hover': {
-                backgroundColor: '#fff0f0',
-              },
-            }}
-          >
-            Get Started
-          </Button>
+          {!isLoggedIn && isHome && (
+            <>
+              <Button
+                component={Link}
+                to="/login"
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  color: '#2b2b4f',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  borderRadius: '999px',
+                  backgroundColor: 'transparent',
+                  '&:hover': { backgroundColor: '#f5f5f5' },
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                component={Link}
+                to="/register"
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  color: '#f14156',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '999px',
+                  border: '2px solid #f14156',
+                  paddingX: 3,
+                  '&:hover': { backgroundColor: '#fff0f0' },
+                }}
+              >
+                Get Started
+              </Button>
+            </>
+          )}
+
+          {isLoggedIn && (isDashboard || isUpload) && (
+            <>
+              <IconButton
+                onClick={handleProfileClick}
+                size="large"
+                color="inherit"
+                aria-controls={open ? 'profile-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+              >
+                <AccountCircleIcon sx={{ color: '#2b2b4f', fontSize: 32 }} />
+              </IconButton>
+              <Menu
+                id="profile-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleProfileClose}
+                MenuListProps={{ 'aria-labelledby': 'profile-button' }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    handleProfileClose();
+                    if (setActiveView) setActiveView('profile');
+                  }}
+                >
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

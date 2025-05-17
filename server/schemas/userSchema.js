@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 // Define user schema
 const userSchema = new mongoose.Schema({
-  // First Name (Now split into firstName and lastName)
+  // First Name
   firstName: {
     type: String,
     required: true,
@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
-  // Role (Set to 'user' by default, can be changed to 'admin' or 'moderator')
+  // Role (default is user)
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -54,6 +54,22 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
   },
+
+  // ✅ Plan Info
+  planType: {
+    type: String,
+    enum: ['Free', 'Pro', 'Enterprise'],
+    default: 'Free',
+  },
+  dailyUploadLimit: {
+    type: Number,
+    default: 2, // for Free plan
+  },
+  storageLimit: {
+    type: Number,
+    default: 10000000, // in bytes (500KB) or adjust to MB (e.g., 100 * 1024 * 1024)
+  },
+
 }, { timestamps: true });
 
 export default userSchema;

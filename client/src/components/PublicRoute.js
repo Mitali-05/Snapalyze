@@ -1,13 +1,16 @@
 // src/components/PublicRoute.js
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Adjust path if needed
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const PublicRoute = ({ children }) => {
   const { token } = useAuth();
+  const location = useLocation();
 
-  // If token exists, user is authenticated — redirect to dashboard
-  if (token) {
+  // Only redirect authenticated users away from login/register
+  const restrictedToGuests = ['/','/login', '/register'];
+
+  if (token && restrictedToGuests.includes(location.pathname)) {
     return <Navigate to="/dashboard" replace />;
   }
 

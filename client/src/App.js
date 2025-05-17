@@ -1,20 +1,20 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Pricing from './pages/Pricing';
 import Upload from './pages/Upload';
 import Dashboard from './pages/Dashboard';
-import AnalyzeText from './pages/AnalyzeText';
 import TextExtraction from './pages/TextExtraction';
 import ClassifyImages from './pages/ClassifyImages';
 import NotFound from './pages/NotFound';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import Header from './components/Header'; // Ensure this is imported
 
 const theme = createTheme({
   palette: {
@@ -26,8 +26,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+    
       <Routes>
-        {/* Public Routes (Redirect to /dashboard if logged in) */}
+        {/* Public Routes - accessible only if NOT logged in */}
         <Route
           path="/"
           element={
@@ -52,8 +53,9 @@ function App() {
             </PublicRoute>
           }
         />
+       
 
-        {/* Protected Routes */}
+        {/* Protected Routes - accessible only if logged in */}
         <Route
           path="/dashboard"
           element={
@@ -70,30 +72,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/analyze-text"
-          element={
-            <ProtectedRoute>
-              <AnalyzeText />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/text-extraction"
-          element={
-            <ProtectedRoute>
-              <TextExtraction />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/classify-images"
-          element={
-            <ProtectedRoute>
-              <ClassifyImages />
-            </ProtectedRoute>
-          }
-        />
+       
 
         {/* 404 Not Found */}
         <Route path="*" element={<NotFound />} />

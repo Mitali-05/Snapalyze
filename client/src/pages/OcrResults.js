@@ -5,20 +5,37 @@ import {
   CardContent,
   Typography,
   CircularProgress,
-  Box
+  Box,
+  Alert,
 } from '@mui/material';
 
 const OcrResults = ({ zipId }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTextResults = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const response = await axios.get(`http://localhost:8000/api/zip/extract-text/${zipId}`);
-        setResults(response.data.results);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Authentication token missing. Please login.');
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:5000/api/zip/ocr/${zipId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setResults(response.data.results || []);
       } catch (error) {
-        console.error("Error fetching text extraction results:", error);
+        console.error('Error fetching text extraction results:', error);
+        setError(error.response?.data?.message || 'Failed to fetch text extraction results.');
       } finally {
         setLoading(false);
       }
@@ -37,21 +54,34 @@ const OcrResults = ({ zipId }) => {
     );
   }
 
+  if (error) {
+    return (
+      <Box mt={4} mx={2}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Box p={4}>
-      <Typography variant="h5" gutterBottom>
-        Text Extraction Results for ZIP ID: {zipId}
-      </Typography>
-      {results.map((file, index) => (
-        <Card key={index} variant="outlined" sx={{ mb: 2, p: 2 }}>
-          <CardContent>
-            <Typography variant="h6">{file.filename}</Typography>
-            <Typography variant="body2" whiteSpace="pre-wrap">
-              {file.text || "No text extracted."}
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
+    <Box>
+      
+           <Typography variant="h5" fontWeight="bold" gutterBottom>
+             Text Extraction Results
+           </Typography>
+      {results.length === 0 ? (
+        <Typography>No text extracted from the ZIP images.</Typography>
+      ) : (
+        results.map((file, index) => (
+          <Card key={index} variant="outlined" sx={{ mb: 2, p: 2 }}>
+            <CardContent>
+              <Typography variant="h6">{file.filename}</Typography>
+              <Typography variant="body2" whiteSpace="pre-wrap">
+                {file.text || 'No text extracted.'}
+              </Typography>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </Box>
   );
 };

@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
-import { handleZipUpload,extractTextFromZipImages,classifyZipImages } from '../controllers/zipController.js';
+import { handleZipUpload, extractTextFromZipImages, classifyZipImages, analyzeZipImages } from '../controllers/zipController.js';
+import { authenticateUser } from '../middleware/authMiddleware.js';  // <-- import your auth middleware
 
 const router = express.Router();
 
@@ -8,9 +9,10 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Route for uploading ZIP files (file field name should be 'file')
-router.post('/upload', upload.single('file'), handleZipUpload);
-router.get('/extract-text/:zipId', extractTextFromZipImages);
-router.get('/classify/:zipId', classifyZipImages);
+// Protect routes with authenticateUser middleware
+router.post('/upload', authenticateUser, upload.single('file'), handleZipUpload);
+router.get('/ocr/:zipId', authenticateUser, extractTextFromZipImages);
+router.get('/classify/:zipId', authenticateUser, classifyZipImages);
+router.get('/analyze/:zipId', authenticateUser, analyzeZipImages);
 
 export default router;
