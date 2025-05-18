@@ -4,81 +4,86 @@ import { Email, Lock } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios
 import Swal from 'sweetalert2'; // Import SweetAlert
+import { useAuth } from '../context/AuthContext'; // Import useAuth from your context
 
 function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from context
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); // Start loading
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/login`, formData);
- console.log('Login response:', response.data);
-      if (response.status === 200 && response.data.token) {
-    
-        // Display success message with SweetAlert
-        Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: 'Welcome back!',
-        }).then(() => {
-          navigate('/dashboard'); // Redirect to dashboard after success
-        });
-      }
-    } catch (err) {
-      setLoading(false); // Stop loading
+  try {
+    const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/login`, formData);
+    console.log('Login response:', response.data);
+    if (response.status === 200 && response.data.token && response.data.userId) {
+      // Pass both token and userId to login function from context
+      login(response.data.token, response.data.userId);
 
-      // Handle different error cases
-      if (err.response?.data?.errors) {
-        const errorMessage = err.response.data.errors[0].msg;
+      Swal.fire({
+        icon: 'success',
+        title: 'Login Successful!',
+        text: 'Welcome back!',
+      }).then(() => {
+        navigate('/dashboard');
+      });
+    } else {
+      // Handle unexpected response
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Invalid login response from server.',
+      });
+    }
+  } catch (err) {
+    setLoading(false);
 
-        // Check specific error message from backend
-        if (errorMessage === 'Email is incorrect') {
-          Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: 'The email address you entered is not registered. Please try again.',
-          });
-        } else if (errorMessage === 'Password is incorrect') {
-          Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: 'The password you entered is incorrect. Please try again.',
-          });
-        } else {
-          // Default error handler for other cases
-          Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: errorMessage,
-          });
-        }
-      } else if (!err.response) {
-        // If no response, assume network error
+    if (err.response?.data?.errors) {
+      const errorMessage = err.response.data.errors[0].msg;
+      if (errorMessage === 'Email is incorrect') {
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
-          text: 'Network error. Please check your connection and try again.',
+          text: 'The email address you entered is not registered. Please try again.',
+        });
+      } else if (errorMessage === 'Password is incorrect') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'The password you entered is incorrect. Please try again.',
         });
       } else {
-        // Default fallback for unknown errors
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
-          text: 'Something went wrong. Please try again later.',
+          text: errorMessage,
         });
       }
-    } finally {
-      setLoading(false); // Stop loading after request
+    } else if (!err.response) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Network error. Please check your connection and try again.',
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Something went wrong. Please try again later.',
+      });
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Box

@@ -44,9 +44,10 @@ const ClassifyResults = ({ zipId }) => {
 
   return (
     <Box p={4}>
-      <Typography variant="h5" gutterBottom>
-        Classification Results for ZIP ID: {zipId}
-      </Typography>
+      <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Classification Results
+            </Typography>
+      
 
       <TableContainer component={Paper}>
         <Table>
