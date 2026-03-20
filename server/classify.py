@@ -1,22 +1,3 @@
-"""
-classify_clip.py  —  OpenAI CLIP with custom domain labels
-
-FIXES from previous version:
-1.  "Not enough disk space" — Added disk space check before loading.
-    Clear space: delete C:\\Users\\<you>\\.cache\\huggingface\\hub if needed.
-2.  Same GridFS "Image not found" fix as EfficientNet version.
-3.  Model loads from local cache if already downloaded (no re-download).
-
-INSTALL:
-    pip install transformers torch torchvision
-
-DISK SPACE REQUIRED: ~700MB for the CLIP model (one-time download).
-If you are low on disk, use classify_efficientnet.py instead — it only
-needs the TensorFlow cache (~50MB for EfficientNetV2B0).
-
-USAGE: rename to classify.py to activate.
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
@@ -47,7 +28,7 @@ db             = client["snapalyze"]
 fs             = gridfs.GridFS(db, collection="images")
 zip_collection = db["zips"]
 
-# ── Check disk space before loading model ────────────────────────────────────
+# ── Check disk space before loading model 
 cache_dir     = os.path.expanduser("~/.cache/huggingface/hub")
 free_gb       = shutil.disk_usage(cache_dir if os.path.exists(cache_dir) else ".").free / (1024**3)
 REQUIRED_GB   = 0.8   # 800MB needed for CLIP
@@ -58,7 +39,7 @@ if free_gb < REQUIRED_GB:
     print(f"   1. Deleting old cache: {cache_dir}")
     print(f"   2. Using classify_efficientnet.py instead (needs only ~50MB)")
 
-# ── Load CLIP ────────────────────────────────────────────────────────────────
+# ── Load CLIP 
 from transformers import CLIPProcessor, CLIPModel
 
 print("Loading CLIP (openai/clip-vit-base-patch32)...")
@@ -67,7 +48,6 @@ clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 clip_model.eval()
 print("CLIP loaded ✓")
 
-# ── Custom labels — edit these to match your use case ────────────────────────
 CUSTOM_LABELS = [
     # Documents & bills
     "electricity bill", "water bill", "bank statement",

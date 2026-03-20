@@ -25,7 +25,6 @@ import { BRAND }       from '../theme/theme';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// ── Same container width as Dashboard header ────────────────────────────────
 const PageContent = ({ children }) => (
   <Box sx={{ maxWidth: CONTENT_MAX, width: '100%', mx: 'auto', px: { xs: 2, sm: 3, md: 4 }, py: 4 }}>
     {children}
@@ -50,8 +49,8 @@ export default function Upload() {
     try {
       const res = await axios.get(`${API_URL}/api/dashboard`, { headers: authHeader });
       setHistory(res.data.uploads || []);
-    } catch { /* silent */ }
-  }, []); // eslint-disable-line
+    } catch { }
+  }, []);
 
   useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
@@ -61,7 +60,7 @@ export default function Upload() {
       setZipId(location.state.zipId);
       toast.info('Previous upload loaded — choose an action below.');
     }
-  }, []); // eslint-disable-line
+  }, []);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (!acceptedFiles.length) return;
@@ -81,7 +80,7 @@ export default function Upload() {
       if (err.response?.status === 429) toast.warning(msg);
       else toast.error(msg);
     } finally { setUploading(false); }
-  }, [fetchHistory]); // eslint-disable-line
+  }, [fetchHistory]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop, accept: { 'application/zip': ['.zip'] }, maxFiles: 1,

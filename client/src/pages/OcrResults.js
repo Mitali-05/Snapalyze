@@ -36,7 +36,7 @@ export default function OcrResults({ zipId }) {
       } finally { setLoading(false); }
     };
     fetch();
-  }, [zipId]); // eslint-disable-line
+  }, [zipId]);
 
   const handleViewImage = async (filename) => {
     setPreviewLoading(true);
@@ -48,7 +48,7 @@ export default function OcrResults({ zipId }) {
         setSelectedName(filename);
         setOpenDialog(true);
       }
-    } catch { /* silent */ } finally { setPreviewLoading(false); }
+    } catch {} finally { setPreviewLoading(false); }
   };
 
   const handleDownloadSingle = (filename, text) => {
@@ -175,7 +175,7 @@ export default function OcrResults({ zipId }) {
             {/* Body */}
             <Box sx={{ px: 2.5, py: 2 }}>
               {skipped ? (
-                /* Photo/artwork — clearly communicate why it was skipped */
+                
                 <Box sx={{
                   display: 'flex', alignItems: 'center', gap: 1.5,
                   p: 2, borderRadius: 2, bgcolor: '#f8f9fe',
@@ -208,7 +208,7 @@ export default function OcrResults({ zipId }) {
                   </Typography>
                 </Box>
               ) : (
-                /* OCR ran but found nothing */
+                
                 <Typography variant="body2" color="text.disabled" fontStyle="italic">
                   No readable text detected. The image may be too blurry, have very small text, or use a non-English language.
                 </Typography>

@@ -204,9 +204,6 @@ Open http://localhost:3000
 ---
 
 ## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete step-by-step guide.
-
 **Summary:**
 - Frontend → Vercel (free)
 - Node.js API → Render (free tier)

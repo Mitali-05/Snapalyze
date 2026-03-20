@@ -1,25 +1,5 @@
 import nodemailer from 'nodemailer';
 
-/**
- * sendPasswordResetEmail
- *
- * FIX: Added `tls: { rejectUnauthorized: false }` which is required for most
- * shared hosting SMTP and Gmail App Password setups.
- * Added full error logging so you can see exactly what goes wrong in the console.
- *
- * For Gmail specifically:
- *   1. Enable 2-Factor Authentication on your Google account
- *   2. Go to https://myaccount.google.com/apppasswords
- *   3. Generate a new App Password (select "Mail" + "Other device")
- *   4. Use that 16-char password as SMTP_PASS (no spaces)
- *
- * In .env:
- *   SMTP_HOST=smtp.gmail.com
- *   SMTP_PORT=587
- *   SMTP_USER=yourname@gmail.com
- *   SMTP_PASS=xxxxxxxxxxxx   ← 16-char app password, NO spaces
- *   CLIENT_URL=http://localhost:3000
- */
 export const sendPasswordResetEmail = async (toEmail, rawToken, firstName) => {
   const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${rawToken}`;
 

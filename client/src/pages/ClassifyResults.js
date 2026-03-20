@@ -36,7 +36,7 @@ export default function ClassifyResults({ zipId }) {
       } finally { setLoading(false); }
     };
     fetch();
-  }, [zipId]); // eslint-disable-line
+  }, [zipId]);
 
   const handleViewImage = async (filename) => {
     setPreviewLoading(true);
@@ -44,7 +44,7 @@ export default function ClassifyResults({ zipId }) {
       const res = await axios.get(`${API_URL}/api/zip/analyze/${zipId}`, { headers: authHeader });
       const match = res.data.analyzed?.find((img) => img.filename === filename);
       if (match?.imagePreview) { setSelectedImage(match.imagePreview); setSelectedName(filename); setOpenDialog(true); }
-    } catch { /* silent */ } finally { setPreviewLoading(false); }
+    } catch { } finally { setPreviewLoading(false); }
   };
 
   const filtered = results.filter((r) =>

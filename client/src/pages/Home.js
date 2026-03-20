@@ -138,8 +138,7 @@ export default function Home() {
     <Box>
       <Header />
 
-      {/* Banner Section */}
-      {/* Banner Section */}
+      
 {/* Banner Section */}
 <Box sx={{ mb: 8 }}>
   <Slider {...sliderSettings}>
@@ -152,7 +151,7 @@ export default function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
-          justifyContent: 'center', // horizontally center
+          justifyContent: 'center',
           px: { xs: 3, md: 10 },
           color: '#fff',
         }}
@@ -165,7 +164,7 @@ export default function Home() {
             borderRadius: 3,
             boxShadow: 4,
             textAlign: 'center',
-             mt: { xs: 3, md: 5 },// controls vertical spacing from top
+             mt: { xs: 3, md: 5 },
             mx:'auto'
           }}
         >
@@ -217,7 +216,6 @@ export default function Home() {
 
 
       {/* About Us */}
-     {/* About Snapalyze */}
 <Container id="about" sx={{ mb: 12, scrollMarginTop: '80px' }}>
   <Typography
     variant="h3"

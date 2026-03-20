@@ -290,7 +290,7 @@ export default function Dashboard() {
     </PageContent>
   );
 
-  // ── PROFILE VIEW — centered, standalone, no inline ChangePassword ──────────
+  // ── PROFILE VIEW —
   const renderProfile = () => (
     <PageContent>
       {/* Centered single card */}
@@ -358,7 +358,7 @@ export default function Dashboard() {
     </PageContent>
   );
 
-  // ── CHANGE PASSWORD VIEW — its own centered page, separate from profile ────
+  // ── CHANGE PASSWORD VIEW — 
   const renderChangePassword = () => (
     <PageContent>
       <Box sx={{ maxWidth: 520, mx: 'auto' }}>
@@ -385,7 +385,7 @@ export default function Dashboard() {
     </PageContent>
   );
 
-  // ── PRICING VIEW ───────────────────────────────────────────────────────────
+  // ── PRICING VIEW ─────
   const renderPricing = () => (
     <PageContent>
       <Box sx={{ mb: 4, textAlign:'center' }}>
