@@ -1,75 +1,39 @@
 import mongoose from 'mongoose';
 
-// Define user schema
-const userSchema = new mongoose.Schema({
-  // First Name
-  firstName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  // Last Name
-  lastName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  // Email
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  // Password
-  password: {
-    type: String,
-    required: true,
-  },
-  // Profession
-  profession: {
-    type: String,
-    enum: ['unemployed', 'student', 'employee', 'freelancer', 'entrepreneur', 'other'],
-    required: true
-  },
-  // Organization (Optional)
-  organization: {
-    type: String,
-    trim: true,
-    default: ''
-  },
-  // Role (default is user)
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  // Active Status
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  // Last Login
-  lastLogin: {
-    type: Date,
-  },
+const userSchema = new mongoose.Schema(
+  {
+    firstName:    { type: String, required: true, trim: true },
+    lastName:     { type: String, required: true, trim: true },
+    email: {
+      type: String, required: true, unique: true,
+      lowercase: true, trim: true,
+    },
+    password:     { type: String, required: true },
+    profession: {
+      type: String,
+      enum: ['unemployed', 'student', 'employee', 'freelancer', 'entrepreneur', 'other'],
+      required: true,
+    },
+    organization: { type: String, trim: true, default: '' },
+    role:         { type: String, enum: ['user', 'admin'], default: 'user' },
+    isActive:     { type: Boolean, default: true },
+    lastLogin:    { type: Date },
 
-  // ✅ Plan Info
-  planType: {
-    type: String,
-    enum: ['Free', 'Pro', 'Enterprise'],
-    default: 'Free',
-  },
-  dailyUploadLimit: {
-    type: Number,
-    default: 2, // for Free plan
-  },
-  storageLimit: {
-    type: Number,
-    default: 10000000, // in bytes (500KB) or adjust to MB (e.g., 100 * 1024 * 1024)
-  },
+    // Plan
+    planType: { type: String, enum: ['Free', 'Pro', 'Enterprise'], default: 'Free' },
+    dailyUploadLimit: { type: Number, default: 2 },
+    storageLimit:     { type: Number, default: 10_000_000 },
 
-}, { timestamps: true });
+    // Daily tracking
+    dailyUploadCount: { type: Number, default: 0 },
+    lastUploadDate:   { type: Date, default: null },
+    usedStorage:      { type: Number, default: 0 },
+
+    // Forgot/Reset Password
+    passwordResetToken:   { type: String, default: null },
+    passwordResetExpires: { type: Date,   default: null },
+  },
+  { timestamps: true }
+);
 
 export default userSchema;

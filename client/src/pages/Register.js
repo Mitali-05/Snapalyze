@@ -1,294 +1,179 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Import Axios
-import swal from 'sweetalert2'; // Import SweetAlert2
+import axios from 'axios';
 import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
+  Box, Paper, Typography, TextField, Button, InputAdornment,
+  LinearProgress, MenuItem, Select, InputLabel, FormControl,
+  Alert, CircularProgress, Divider,
 } from '@mui/material';
-import {
-  Person,
-  Email,
-  Lock,
-  Work,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Person, Email, Lock, Work, Visibility, VisibilityOff } from '@mui/icons-material';
+import { useNavigate, Link } from 'react-router-dom';
+import PageWrapper from '../components/PageWrapper';
+import { BRAND }   from '../theme/theme';
+import logo        from '../logo.jpg';
 
-function Register() {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    profession: '',
-    organization: '',
-    role: 'user',
-    subscriptionType: 'free',
-  });
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+const RULES = [
+  { test: (p) => p.length >= 8,                     label: '8+ chars' },
+  { test: (p) => /[A-Z]/.test(p),                   label: 'Uppercase' },
+  { test: (p) => /[a-z]/.test(p),                   label: 'Lowercase' },
+  { test: (p) => /\d/.test(p),                      label: 'Number' },
+  { test: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: 'Special char' },
+];
+
+const getStrength = (pw) => {
+  const n = RULES.filter((r) => r.test(pw)).length;
+  if (n <= 2) return { label: 'Weak',   color: 'error',   pct: 33 };
+  if (n <= 4) return { label: 'Medium', color: 'warning', pct: 66 };
+  return              { label: 'Strong', color: 'success', pct: 100 };
+};
+
+export default function Register() {
   const navigate = useNavigate();
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', password: '',
+    confirmPassword: '', profession: '', organization: '', role: 'user',
+  });
+  const [showPwd,    setShowPwd]    = useState(false);
+  const [showCon,    setShowCon]    = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [apiErrors,  setApiErrors]  = useState([]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => { setForm({ ...form, [e.target.name]: e.target.value }); setApiErrors([]); };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Check if passwords match
-    if (formData.password !== formData.confirmPassword) {
-      swal.fire({
-        title: 'Passwords Do Not Match!',
-        text: 'Please make sure both passwords are the same.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
+    e.preventDefault(); setApiErrors([]);
+    const unmet = RULES.filter((r) => !r.test(form.password)).map((r) => r.label);
+    if (unmet.length) { setApiErrors([`Password needs: ${unmet.join(', ')}`]); return; }
+    if (form.password !== form.confirmPassword) { setApiErrors(['Passwords do not match']); return; }
     setLoading(true);
-    setError(null);
-
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/register`, formData);
-      console.log('Registration Successful:', response.data);
-
-      // Show success message with SweetAlert2
-      swal.fire({
-        title: 'Registration Successful!',
-        text: 'You can now log in with your credentials.',
-        icon: 'success',
-        confirmButtonText: 'Go to Login',
-      }).then(() => {
-        navigate('/login'); // Navigate to login page after successful registration
-      });
-
+      await axios.post(`${API_URL}/api/users/register`, form);
+      navigate('/login', { state: { registered: true } });
     } catch (err) {
-      console.error('Registration Error:', err);
-
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (Array.isArray(data.errors) && data.errors.length > 0) {
-          setError(data.errors[0].msg);
-        } else if (typeof data === 'string') {
-          setError(data);
-        } else if (data.message) {
-          setError(data.message);
-        } else {
-          setError('An unexpected error occurred.');
-        }
-      } else {
-        setError('Registration failed. Please try again.');
-      }
-
-      // Show error message with SweetAlert2
-      swal.fire({
-        title: 'Registration Failed',
-        text: error || 'Please try again later.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-    } finally {
-      setLoading(false);
-    }
+      setApiErrors(err.response?.data?.errors?.map((e) => e.msg) || [err.response?.data?.message || 'Registration failed.']);
+    } finally { setLoading(false); }
   };
 
-  const getPasswordStrength = (password) => {
-    let score = 0;
-
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 1) return { label: 'Weak', color: 'error', value: 33 };
-    if (score === 2 || score === 3) return { label: 'Medium', color: 'warning', value: 66 };
-    return { label: 'Strong', color: 'success', value: 100 };
-  };
-
-  const passwordStrength = getPasswordStrength(formData.password);
+  const str = form.password ? getStrength(form.password) : null;
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#fff',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <Paper elevation={4} sx={{ p: 4, width: 500, borderRadius: 2, boxShadow: 3 }}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Register
+    <PageWrapper sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Left panel */}
+      <Box sx={{
+        display: { xs: 'none', md: 'flex' }, width: 380, flexShrink: 0,
+        background: `linear-gradient(160deg, ${BRAND.navy} 0%, ${BRAND.teal} 100%)`,
+        flexDirection: 'column', alignItems: 'center', justifyContent: 'center', px: 5, gap: 3,
+      }}>
+        <img src={logo} alt="Snapalyze" style={{ width: 90 }} />
+        <Typography variant="h5" fontWeight={800} color="#fff" textAlign="center">Join Snapalyze</Typography>
+        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)', textAlign: 'center', lineHeight: 1.7 }}>
+          Free plan includes 2 uploads per day.<br />No credit card required.
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="First Name"
-              name="firstName"
-              required
-              value={formData.firstName}
-              onChange={handleChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Last Name"
-              name="lastName"
-              required
-              value={formData.lastName}
-              onChange={handleChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person />
-                  </InputAdornment>
-                ),
-              }}
-            />
+        <Box sx={{ width: '100%', borderRadius: 2, background: 'rgba(255,255,255,0.1)', p: 2 }}>
+          {['✓  AI image classification', '✓  OCR text extraction', '✓  Visual insights dashboard', '✓  Secure cloud storage'].map((f) => (
+            <Typography key={f} variant="body2" sx={{ color: 'rgba(255,255,255,0.82)', mb: 0.75 }}>{f}</Typography>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Right form */}
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: { xs: 2, sm: 4 }, py: 6 }}>
+        <Paper elevation={0} sx={{
+          p: { xs: 3, sm: 4 }, width: '100%', maxWidth: 460,
+          borderRadius: 4, border: `1px solid ${BRAND.border}`,
+          boxShadow: '0 8px 40px rgba(13,46,63,0.09)',
+        }}>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h5" fontWeight={800} sx={{
+              background: `linear-gradient(135deg, ${BRAND.navy}, ${BRAND.blue})`,
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', mb: 0.5,
+            }}>Create Account</Typography>
+            <Typography variant="body2" color="text.secondary">Free forever · No credit card</Typography>
           </Box>
 
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Email"
-            name="email"
-            type="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Email />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <FormControl fullWidth margin="normal" required>
-            <InputLabel>Profession</InputLabel>
-            <Select
-              label="Profession"
-              name="profession"
-              value={formData.profession}
-              onChange={handleChange}
-            >
-              <MenuItem value="unemployed">Unemployed</MenuItem>
-              <MenuItem value="student">Student</MenuItem>
-              <MenuItem value="employee">Employee</MenuItem>
-              <MenuItem value="freelancer">Freelancer</MenuItem>
-              <MenuItem value="entrepreneur">Entrepreneur</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </Select>
-          </FormControl>
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Organization (Optional)"
-            name="organization"
-            value={formData.organization}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Work />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={formData.password}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {formData.password && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" color={`${passwordStrength.color}.main`}>
-                Strength: {passwordStrength.label}
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={passwordStrength.value}
-                color={passwordStrength.color}
-                sx={{ height: 6, borderRadius: 1, mt: 0.5 }}
-              />
-            </Box>
+          {apiErrors.length > 0 && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {apiErrors.map((m, i) => <div key={i}>{m}</div>)}
+            </Alert>
           )}
 
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Confirm Password"
-            name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <TextField fullWidth label="First Name" name="firstName" required value={form.firstName} onChange={handleChange}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment> }} />
+              <TextField fullWidth label="Last Name" name="lastName" required value={form.lastName} onChange={handleChange}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment> }} />
+            </Box>
 
-          {loading && <Typography variant="body2" color="primary">Registering...</Typography>}
+            <TextField fullWidth label="Email" name="email" type="email" required value={form.email} onChange={handleChange} sx={{ mb: 2 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment> }} />
 
-          <Button variant="contained" fullWidth type="submit" sx={{ mt: 3 }}>
-            REGISTER
-          </Button>
-        </form>
+            <FormControl fullWidth required sx={{ mb: 2 }}>
+              <InputLabel>Profession</InputLabel>
+              <Select label="Profession" name="profession" value={form.profession} onChange={handleChange}>
+                {['unemployed','student','employee','freelancer','entrepreneur','other'].map((p) => (
+                  <MenuItem key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <Typography align="center" sx={{ mt: 2 }}>
-          Already have an account?{' '}
-          <span
-            style={{ color: 'blue', fontWeight: 'bold', cursor: 'pointer' }}
-            onClick={() => navigate('/login')}
-          >
-            Login here
-          </span>
-        </Typography>
-      </Paper>
-    </Box>
+            <TextField fullWidth label="Organization (optional)" name="organization" value={form.organization} onChange={handleChange} sx={{ mb: 2 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Work sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment> }} />
+
+            <TextField
+              fullWidth label="Password" name="password" type={showPwd ? 'text' : 'password'} required
+              value={form.password} onChange={handleChange} sx={{ mb: 1 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Lock sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment>,
+                endAdornment: <InputAdornment position="end"><Box component="span" onClick={() => setShowPwd(!showPwd)} sx={{ cursor: 'pointer', display: 'flex', color: 'text.secondary' }}>{showPwd ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}</Box></InputAdornment>,
+              }}
+            />
+
+            {str && (
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="caption" color={`${str.color}.main`} fontWeight={700}>{str.label}</Typography>
+                </Box>
+                <LinearProgress variant="determinate" value={str.pct} color={str.color} sx={{ height: 5, mb: 1 }} />
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                  {RULES.map((rule) => (
+                    <Typography key={rule.label} variant="caption"
+                      sx={{ color: rule.test(form.password) ? BRAND.teal : 'text.disabled', fontWeight: rule.test(form.password) ? 600 : 400 }}>
+                      {rule.test(form.password) ? '✓' : '○'} {rule.label}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
+            )}
+
+            <TextField
+              fullWidth label="Confirm Password" name="confirmPassword" type={showCon ? 'text' : 'password'} required
+              value={form.confirmPassword} onChange={handleChange}
+              error={form.confirmPassword.length > 0 && form.password !== form.confirmPassword}
+              helperText={form.confirmPassword.length > 0 && form.password !== form.confirmPassword ? 'Passwords do not match' : ''}
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Lock sx={{ fontSize: 18, color: BRAND.blue }} /></InputAdornment>,
+                endAdornment: <InputAdornment position="end"><Box component="span" onClick={() => setShowCon(!showCon)} sx={{ cursor: 'pointer', display: 'flex', color: 'text.secondary' }}>{showCon ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}</Box></InputAdornment>,
+              }}
+            />
+
+            <Button type="submit" variant="contained" fullWidth size="large" disabled={loading} sx={{ py: 1.5, mb: 2 }}>
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'Create Account'}
+            </Button>
+          </form>
+
+          <Divider sx={{ my: 2 }}><Typography variant="caption" color="text.secondary">or</Typography></Divider>
+          <Typography align="center" variant="body2" color="text.secondary">
+            Already have an account?{' '}
+            <Typography component={Link} to="/login" variant="body2"
+              sx={{ color: BRAND.blue, fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+              Sign in
+            </Typography>
+          </Typography>
+        </Paper>
+      </Box>
+    </PageWrapper>
   );
 }
-
-export default Register;
