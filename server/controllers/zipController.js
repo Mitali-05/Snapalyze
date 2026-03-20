@@ -321,7 +321,7 @@ export const classifyZipImages = async (req, res) => {
     if (!zip) return res.status(404).json({ message: 'ZIP not found' });
     if (zip.userId.toString() !== req.user._id.toString())
       return res.status(403).json({ message: 'Forbidden' });
-    const r = await axios.get(`http://localhost:8000/api/zip/classify/${req.params.zipId}`);
+    const r = await axios.get(`${process.env.PYTHON_API_URL || "http://localhost:8000"}/api/zip/classify/${req.params.zipId}`);
     return res.json(r.data);
   } catch (err) {
     console.error('Classify error:', err);
