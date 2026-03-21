@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-  Box, Typography, CircularProgress, Alert, Button, Chip, Paper,
+  Box, Typography, Alert, Button, Chip, Paper,
   Dialog, DialogTitle, DialogContent, IconButton, Divider, Skeleton,
 } from '@mui/material';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
